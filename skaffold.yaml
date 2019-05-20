@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/cb-kubecd/barcalona19:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/cb-kubecd/barcalona19:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: barcalona19
+        chartPath: charts/barcalona19
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/cb-kubecd/barcalona19'
+          image.tag: '{{.DIGEST_HEX}}'
